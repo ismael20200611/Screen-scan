@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Kurdish Camera Spell Checker</title>
+<style>
+:root{--bg:#07152d;--panel:#102443;--panel2:#0b1b35;--line:#29446b;--text:#edf5ff;--muted:#a9bdd8;--green:#35e08b;--red:#ff4f68;--gold:#ffb52e}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#123c72 0,#07152d 58%,#050c1b 100%);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh;padding:18px}
+.wrap{max-width:1200px;margin:auto}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+.topbar{position:sticky;top:8px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding:10px 12px;border:1px solid #365579;border-radius:15px;background:rgba(5,18,37,.92);backdrop-filter:blur(14px);box-shadow:0 10px 28px #0004}
+.brand{font-weight:800;letter-spacing:.2px;color:#fff;white-space:nowrap}
+.navlinks{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.navlinks a{color:#c5d8f1;text-decoration:none;padding:9px 12px;border-radius:9px;font-size:13px;border:1px solid transparent}
+.navlinks a:hover,.navlinks a.active{background:#16385e;border-color:#3b608a;color:#fff}
+.menu-toggle{display:none}
+.page-section{scroll-margin-top:100px}
+
+h1{font-size:clamp(22px,3vw,34px);margin:0 0 6px} .sub{color:var(--muted);font-size:14px;line-height:1.7}
+.pill{border:1px solid #35608f;background:#0b2444;border-radius:999px;padding:8px 13px;color:#b9d7ff;font-size:13px}
+.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+.panel{background:linear-gradient(155deg,rgba(19,43,76,.96),rgba(8,24,46,.97));border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0;box-shadow:0 12px 35px #0003}
+.panel h2{font-size:18px;margin:0 0 12px}
+.camera-box{position:relative;overflow:hidden;background:#020711;border-radius:13px;min-height:230px;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center}
+video{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}
+.camera-placeholder{color:#91a8c8;text-align:center;padding:25px;line-height:1.8}
+.scan-frame{position:absolute;inset:10% 6%;border:1px solid #37d99a80;border-radius:8px;pointer-events:none;box-shadow:0 0 0 999px #0001}
+.controls{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+button,select,input{font:inherit;border-radius:10px;border:1px solid #365579;background:#0a1b32;color:var(--text);padding:10px 12px}
+button{cursor:pointer;font-weight:700}button.primary{background:#087a56;border-color:#13a979}button.stop{background:#7c2035;border-color:#bd3854}button:disabled{opacity:.45;cursor:not-allowed}
+.status{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--muted);font-size:13px}.dot{width:9px;height:9px;border-radius:50%;background:#7b8ca5}.dot.live{background:var(--green);box-shadow:0 0 10px var(--green)}
+.note{font-size:12px;line-height:1.7;color:var(--muted);margin-top:12px}
+textarea{width:100%;min-height:95px;resize:vertical;background:#07162b;border:1px solid #29446b;border-radius:12px;color:var(--text);padding:12px;line-height:1.9}
+.result{min-height:100px;background:#07162b;border:1px solid #29446b;border-radius:12px;padding:13px;line-height:2.1;overflow-wrap:anywhere;white-space:pre-wrap}
+.wrong{color:var(--red);text-decoration:underline wavy var(--red);text-decoration-thickness:1.5px;font-weight:700}
+.correct{color:var(--green);font-weight:700;background:#123d35;border-radius:4px;padding:1px 3px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:9px 0 12px}.legend span{display:flex;gap:6px;align-items:center}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--red)}.swatch.green{background:var(--green)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+label{display:block;font-size:13px;color:#c6d7ed;margin-bottom:7px}
+.small{font-size:12px;color:var(--muted);line-height:1.7}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.settings-menu{border:1px solid #365579;border-radius:12px;padding:11px 12px;background:#0a1b32}
+.settings-menu summary{font-weight:700}
+summary{cursor:pointer;color:#c9ddf6}
+.error{color:#ff9ca9}.good{color:#8df0bd}
+@media(max-width:820px){.layout{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}body{padding:10px}.panel{padding:12px}.topbar{top:4px}.menu-toggle{display:inline-flex}.navlinks{display:none;width:100%;flex-direction:column;align-items:stretch}.navlinks.open{display:flex}.navlinks a{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="topbar" aria-label="مێنیوی سەرەکی">
+  <div class="brand">Kurdish Live Checker</div>
+  <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="navLinks">☰ مێنیو</button>
+  <div class="navlinks" id="navLinks">
+    <a href="#home" class="active">⌂ سەرەکی</a>
+    <a href="#camera">📷 کامێرا</a>
+    <a href="#checker">✍️ پشکنینی دەق</a>
+    <a href="#help">ⓘ ڕێنمایی</a>
+    <a href="#settings">⚙️ ڕێکخستنەکان</a>
+  </div>
+</nav>
+<header id="home" class="page-section">
+  <div><h1>پشکنینی ڕێنووس بە کامێرا</h1><div class="sub">خوێندنەوەی ڕاستەوخۆی دەق لە مۆنتەری کۆمپیوتەر و پیشاندانی شوێنی هەڵەکان</div></div>
+  <span class="pill">Live OCR · Sorani / Kurmanji</span>
+</header>
+
+<div class="layout">
+<section class="panel">
+  <h2>١. کامێرای ڕاستەوخۆ</h2>
+  <div class="camera-box" id="cameraBox">
+    <video id="video" autoplay muted playsinline hidden></video>
+    <div class="camera-placeholder" id="placeholder">کامێرای مۆبایلەکەت چالاک بکە، پاشان مۆنتەرەکە لە چوارچێوەکەدا دابنێ.</div>
+    <div class="scan-frame"></div>
+  </div>
+  <div class="controls">
+    <button class="primary" id="startBtn">▶ دەستپێکردنی کامێرا</button>
+    <button class="stop" id="stopBtn" disabled>■ وەستاندن</button>
+    <button id="scanBtn" disabled>⟳ ئێستا بخوێنەوە</button>
+  </div>
+  <div class="status"><span class="dot" id="liveDot"></span><span id="statusText">کامێرا هێشتا دەست پێ نەکردووە.</span></div>
+  <div class="note">بۆ پاراستنی تایبەتمەندی، OCR لەسەر ئامێرەکەت ئەنجام دەدرێت. ڕووناکی باش، فۆنتی گەورە و کەمکردنەوەی ڕەنگدانەوەی شاشە، ئەنجام باشتر دەکەن.</div>
+  <details>
+    <summary>ئەگەر کامێرا کار نەکرد</summary>
+    <p class="small">ئەم فایلە لە HTTPS یان localhost بکەرەوە و مۆڵەتی کامێرا بدە. لە هەندێک وێبگەڕدا کردنەوەی فایلەکە بە file:// ڕێگە بە کامێرا نادات.</p>
+  </details>
+</section>
+
+<section class="panel">
+  <h2>٢. دەقی ناسراو و پشکنینی ڕێنووس</h2>
+  <details class="settings-menu page-section" id="settings">
+    <summary>⚙️ مێنیوی ڕێکخستنەکان (زمان و خێرایی)</summary>
+    <div class="grid2" style="margin-top:12px">
+      <div><label for="language">زمانی دەق</label><select id="language"><option value="ckb" selected>کوردیی سۆرانی</option><option value="kmr">کوردیی کرمانجی</option><option value="eng">ئینگلیزی</option><option value="ara">عەرەبی</option></select></div>
+      <div><label for="interval">ماوەی خوێندنەوە</label><select id="interval"><option value="700">هەر ٠.٧ چرکە</option><option value="1100" selected>هەر ١.١ چرکە</option><option value="1800">هەر ١.٨ چرکە</option><option value="2500">هەر ٢.٥ چرکە</option></select></div>
+    </div>
+    <div class="small" style="margin-top:8px">پاش هەڵبژاردنی زمان، کامێرا خۆکارانە بەو ڕێکخستنە کار دەکات. بۆ گۆڕینی زمان لە کاتی کامێرای چالاکدا، OCR خۆکارانە نوێ دەبێتەوە.</div>
+  </details>
+  <label for="rawText" style="margin-top:14px">دەقی ناسراو (دەتوانیت دەستکاری بکەیت)</label>
+  <textarea id="rawText" placeholder="دەقی خوێندراو لێرە دەردەکەوێت..."></textarea>
+  <div class="legend"><span><i class="swatch"></i> وشەی گومانلێکراو/هەڵە</span><span><i class="swatch green"></i> پێشنیاری ڕاستکراوە</span></div>
+  <label>پشکنینی دەق</label>
+  <div class="result" id="checkedText">کاتێک دەق بخوێندرێتەوە، ئەنجامەکە لێرە پیشان دەدرێت.</div>
+  <div class="small" id="spellNote">تێبینی: فەرهەنگی کوردی پێویستە بۆ دیاریکردنی دڵنیای هەڵەی ڕێنووس.</div>
+  <div class="controls"><button id="checkBtn">پشکنینی دەقی نووسراو</button><button id="copyBtn">کۆپیکردنی دەق</button></div>
+  <details>
+    <summary>زیادکردنی پێشنیاری وشە (فەرهەنگی کەسی)</summary>
+    <p class="small">هەر وشەیەک لەسەر هێڵێکی جیاواز بنووسە، بە شێوەی «هەڵە=ڕاست». ئەمە بۆ هەر زمانێک دەتوانرێت فەرهەنگێکی تایبەت بێت.</p>
+    <textarea id="customWords" placeholder="نموونە: goverment=government&#10;هەڵە=وشەی ڕاست"></textarea>
+    <button id="saveWordsBtn" style="margin-top:8px">بەکارهێنانی پێشنیارەکان</button>
+  </details>
+</section>
+</div>
+<p class="small" style="margin-top:16px">وەشانی سەرەتایی: OCR بەردەوامە، بەڵام تێبینییە سوورەکان گومان/پێشنیارن. OCR بە خۆی هەڵەی زمان دیاری ناکات؛ بۆ سۆرانی و کرمانجی، OCR بە مۆدێلی عەرەبی وەک جێگرەوە کار دەکات؛ بۆ ناسینەوەی وردتر، مۆدێلی تایبەتی کوردی پێویستە.</p>
+</div>
+
+<canvas id="canvas" hidden></canvas>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(() => {
+ const menuToggle=document.getElementById('menuToggle');
+ const navLinks=document.getElementById('navLinks');
+ if(menuToggle && navLinks){
+   menuToggle.addEventListener('click',()=>{
+     const open=navLinks.classList.toggle('open');
+     menuToggle.setAttribute('aria-expanded',String(open));
+   });
+   navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+     navLinks.querySelectorAll('a').forEach(link=>link.classList.remove('active'));
+     a.classList.add('active');
+     navLinks.classList.remove('open');
+     menuToggle.setAttribute('aria-expanded','false');
+   }));
+ }
+ const video=document.getElementById('video'), canvas=document.getElementById('canvas');
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const startBtn=document.getElementById('startBtn'), stopBtn=document.getElementById('stopBtn'), scanBtn=document.getElementById('scanBtn');
+ const statusText=document.getElementById('statusText'), liveDot=document.getElementById('liveDot');
+ const placeholder=document.getElementById('placeholder'), rawText=document.getElementById('rawText');
+ const checkedText=document.getElementById('checkedText'), spellNote=document.getElementById('spellNote');
+ let stream=null, timer=null, worker=null, busy=false, lastText='', customMap={};
+
+ function setStatus(text,live=false){statusText.textContent=text;liveDot.classList.toggle('live',live)}
+ function parseCustom(){
+   customMap={};
+   document.getElementById('customWords').value.split(/\r?\n/).forEach(line=>{
+     const i=line.indexOf('=');
+     if(i>0){const a=line.slice(0,i).trim(),b=line.slice(i+1).trim();if(a&&b)customMap[a]=b;}
+   });
+ }
+ function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ function renderCheck(){
+   const text=rawText.value.trim();
+   if(!text){checkedText.textContent='هیچ دەقێک نەخوێندراوەتەوە.';return}
+   const words=text.split(/(\s+|[،؛,.!?؟:()[\]{}«»"'—–-]+)/u);
+   checkedText.innerHTML=words.map(w=>{
+     if(!w || /^\s+$/.test(w) || /^[،؛,.!?؟:()[\]{}«»"'—–-]+$/u.test(w)) return esc(w);
+     if(customMap[w]) return '<span class="wrong">'+esc(w)+'</span> <span aria-label="پێشنیار" class="correct">'+esc(customMap[w])+'</span>';
+     return esc(w);
+   }).join('');
+   const hasCustom=Object.keys(customMap).length>0;
+   spellNote.textContent=hasCustom?'وشە سوورەکان لە فەرهەنگی کەسیی تۆدا دۆزراونەتەوە؛ پێشنیاری سەوز وشەی جێگرەوەیە.':'بۆ دیاریکردنی هەڵەی ڕێنووسی کوردی، فەرهەنگی پڕ و پشتڕاستکراو پێویستە. لەم وەشانەدا وشەی هەڵە بە خۆکارانە دانانرێت، مەگەر پێشنیاری کەسی زیاد بکەیت.';
+ }
+ async function initWorker(){
+   if(worker)return worker;
+   if(!window.Tesseract) throw new Error('کتێبخانەی OCR بارنەبووە؛ پەیوەندی ئینتەرنێت بپشکنە.');
+   setStatus('ئامادەکردنی OCR...');
+   const selectedLang=document.getElementById('language').value;
+   // Tesseract.js does not reliably provide dedicated Sorani/Kurmanji traineddata.
+   // Arabic OCR is used as a script-level fallback for Kurdish text written in Arabic script.
+   const ocrLang=(selectedLang==='ckb'||selectedLang==='kmr')?'ara':selectedLang;
+   worker=await Tesseract.createWorker(ocrLang,1,{logger:m=>{
+     if(m.status==='recognizing text') setStatus('خوێندنەوەی دەق... '+Math.round((m.progress||0)*100)+'% ',true);
+   }});
+   return worker;
+ }
+ async function recognize(){
+   if(!stream||busy||video.readyState<2)return;
+   busy=true;
+   try{
+     const w=await initWorker();
+     const vw=video.videoWidth,vh=video.videoHeight;
+     if(!vw||!vh)return;
+     canvas.width=Math.min(vw,1600);canvas.height=Math.round(vh*canvas.width/vw);
+     ctx.drawImage(video,0,0,canvas.width,canvas.height);
+     // Enlarge slightly for better OCR on monitor text
+     const result=await w.recognize(canvas);
+     const text=(result.data.text||'').trim();
+     if(text && text!==lastText){lastText=text;rawText.value=text;renderCheck();}
+     setStatus(text?'کامێرا چالاکە؛ دەق نوێ دەکرێتەوە.':'دەق نەدۆزرایەوە؛ مۆنتەر ڕوونتر بکە.',true);
+   }catch(e){setStatus('هەڵە: '+e.message);console.error(e)}
+   finally{busy=false}
+ }
+ async function start(){
+   try{
+     if(!navigator.mediaDevices?.getUserMedia)throw new Error('وێبگەڕەکەت کامێرا لەم شوێنە پشتیوانی ناکات. HTTPS بەکاربهێنە.');
+     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+     video.srcObject=stream;video.hidden=false;placeholder.hidden=true;
+     await video.play();
+     startBtn.disabled=true;stopBtn.disabled=false;scanBtn.disabled=false;
+     setStatus('کامێرا چالاکە؛ ئامادەی خوێندنەوەی ڕاستەوخۆیە.',true);
+     await recognize();
+     timer=setInterval(recognize,Number(document.getElementById('interval').value));
+   }catch(e){setStatus('کامێرا نەکراوە: '+e.message);stop()}
+ }
+ function stop(){
+   if(timer){clearInterval(timer);timer=null}
+   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+   video.srcObject=null;video.hidden=true;placeholder.hidden=false;
+   startBtn.disabled=false;stopBtn.disabled=true;scanBtn.disabled=true;
+   setStatus('کامێرا وەستێنراوە.');
+ }
+ startBtn.addEventListener('click',start);stopBtn.addEventListener('click',stop);
+ scanBtn.addEventListener('click',recognize);
+ document.getElementById('checkBtn').addEventListener('click',renderCheck);
+ document.getElementById('saveWordsBtn').addEventListener('click',()=>{parseCustom();renderCheck();spellNote.textContent='فەرهەنگی کەسی نوێکرایەوە.'});
+ rawText.addEventListener('input',renderCheck);
+ document.getElementById('language').addEventListener('change',async()=>{
+   if(worker){try{await worker.terminate()}catch(e){}worker=null}
+   lastText='';
+   if(stream){
+     if(timer){clearInterval(timer);timer=null}
+     setStatus('زمان گۆڕدرا؛ OCR بە خۆکارانە نوێ دەبێتەوە.',true);
+     await recognize();
+     timer=setInterval(recognize,Number(document.getElementById('interval').value));
+   }
+ });
+ document.getElementById('interval').addEventListener('change',()=>{
+   if(timer){clearInterval(timer);timer=setInterval(recognize,Number(document.getElementById('interval').value))}
+ });
+ document.getElementById('copyBtn').addEventListener('click',async()=>{
+   try{await navigator.clipboard.writeText(rawText.value);setStatus('دەق کۆپی کرا.')}
+   catch(e){rawText.select();document.execCommand('copy');setStatus('دەق کۆپی کرا.')}
+ });
+ window.addEventListener('pagehide',stop);
+})();
+</script>
+</body>
+</html>
