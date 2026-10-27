@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07152d">
+<title>Rudaw MCR Checker — Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050b16;--panel:#0c1c32;--panel2:#071426;--line:#284361;--text:#eef6ff;--muted:#a8bdd4;--accent:#e31b23;--wrong:#ff5368;--right:#38e49a;--raw:#36c7e8;--gold:#ffe600;--radius:16px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at top,#12345a 0,#071426 48%,#030812 100%);color:var(--text);font-family:"Noto Sans Arabic",Tahoma,Arial,sans-serif;min-height:100vh;padding:12px}
+button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}
+.app{max-width:1500px;margin:auto}.topbar{position:sticky;top:6px;z-index:20;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px;margin-bottom:14px;border:1px solid #365579;border-radius:14px;background:#061426ed;backdrop-filter:blur(14px);box-shadow:0 10px 28px #0005}
+.brand{font-weight:800;display:flex;gap:8px;align-items:center}.brand-badge{background:var(--accent);padding:2px 8px;border-radius:6px;font-size:12px}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn,.field,select,input[type=number],input[type=text],input[type=color]{border:1px solid #365579;background:#091a2f;color:var(--text);border-radius:9px;padding:9px 11px}
+.btn{font-weight:700}.btn.primary{background:var(--accent);border-color:#ff5c62}.btn.ghost{background:#102744}.btn.danger{background:#6e2033;border-color:#a93b50}.btn.small{padding:6px 9px;font-size:12px}
+.page-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 2px 16px}.page-title h1{font-size:clamp(21px,3vw,32px);margin:0 0 5px}.sub{color:var(--muted);font-size:13px;line-height:1.7}.tag{border:1px solid #355a7f;background:#0b2340;border-radius:99px;padding:7px 11px;color:#c7ddf5;font-size:12px}
+.layout{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:14px}.panel{min-width:0;background:linear-gradient(155deg,#102641f5,#071629f7);border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:0 12px 32px #0003;scroll-margin-top:95px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.panel-head h2{font-size:16px;margin:0;display:flex;gap:8px;align-items:center}.num{width:31px;height:31px;border-radius:8px;display:inline-grid;place-items:center;font-weight:900;font-size:18px;flex-shrink:0}.n1{color:#65a1ff;border:1px solid #2169ef;background:#102b55}.n2{color:#ff727c;border:1px solid #a71f2a;background:#42131b}.n3{color:#42d7f3;border:1px solid #0786a0;background:#073543}.n4{color:#fff200;border:1px solid #a9a000;background:#383600}
+.settings-panel{display:none;margin-bottom:14px}.settings-panel.open{display:block}.settings-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.setting label{display:block;color:#c9d9eb;font-size:12px;margin-bottom:6px}.setting input,.setting select{width:100%;min-width:0}.setting input[type=checkbox]{width:auto;accent-color:var(--accent);transform:scale(1.15)}.setting-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.helptext{color:var(--muted);font-size:11px;line-height:1.7;margin-top:5px}
+.camera-box{position:relative;background:#000;border:1px solid #253e5b;border-radius:12px;overflow:hidden;aspect-ratio:16/9;min-height:230px;display:flex;align-items:center;justify-content:center}
+#video{width:100%;height:100%;object-fit:contain;position:absolute;inset:0}#cameraPlaceholder{padding:24px;text-align:center;color:#93abc8;line-height:1.8}.scan-frame{position:absolute;inset:12% 5%;border:2px dashed #e31b23;border-radius:8px;pointer-events:none;box-shadow:0 0 0 999px #0001}.camera-overlay{position:absolute;bottom:8px;left:8px;right:8px;display:flex;gap:6px;justify-content:space-between;pointer-events:none}.camera-overlay span{background:#000a;border:1px solid #ffffff28;padding:4px 7px;border-radius:6px;font-size:11px;color:#fff}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.status{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px;margin-top:10px}.dot{width:8px;height:8px;border-radius:50%;background:#8391a3}.dot.live{background:var(--right);box-shadow:0 0 10px var(--right)}
+.textarea,.result{width:100%;min-height:100px;background:#061426;border:1px solid #284361;border-radius:10px;color:var(--text);padding:12px;line-height:2;direction:rtl;text-align:right;unicode-bidi:plaintext;overflow-wrap:anywhere}.textarea{resize:vertical}.result{white-space:pre-wrap;min-height:90px}.list{display:flex;flex-direction:column;gap:9px}.entry{border:1px solid #2c4968;border-radius:10px;background:#071629;padding:10px}.entry-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px}.entry-time{font-size:11px;color:var(--muted);direction:ltr}.entry-text{white-space:pre-wrap;line-height:2;overflow-wrap:anywhere}.entry-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.empty{color:#8fa6c2;border:1px dashed #34506d;border-radius:10px;padding:18px;text-align:center;font-size:13px;line-height:1.8}
+.wrong{color:var(--wrong);text-decoration:underline wavy var(--wrong);text-decoration-thickness:1.5px;font-weight:800}.suggestion{color:var(--right);background:#103b31;border-radius:4px;padding:1px 4px;font-weight:700}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin:8px 0}.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-left:4px}
+.subsection{margin-top:12px;padding-top:12px;border-top:1px solid #233d5b}.subsection h3{font-size:13px;margin:0 0 8px}.small-label{font-size:12px;color:#c9d9eb;display:block;margin-bottom:6px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}.footer-note{color:#91a8c4;font-size:11px;line-height:1.8;margin:14px 3px}
+[hidden]{display:none!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar{top:3px}}
+@media(max-width:520px){body{padding:7px}.panel{padding:10px}.settings-grid,.two-col{grid-template-columns:1fr}.page-title{align-items:flex-start}.camera-box{min-height:210px}.topbar{padding:8px}.brand{font-size:13px}}
+</style>
+<link rel="stylesheet" href="./rudaw-font.css">
+</head>
+<body>
+<div class="app">
+  <nav class="topbar" aria-label="مێنیوی سەرەکی">
+    <div class="brand">Rudaw MCR Checker <span class="brand-badge">LIVE STUDIO</span></div>
+    <div class="top-actions">
+      <span class="tag">Sorani · MCR</span>
+      <button class="btn primary" id="settingsToggle" aria-expanded="false">⚙ ڕێکخستنەکان</button>
+    </div>
+  </nav>
+
+  <header class="page-title">
+    <div><h1>پشکنینی دەقی مۆنتەر و چایڕۆن</h1><div class="sub">سیستەمی یارمەتیدەری خوێندنەوە و ڕاستکردنەوەی دەقی هەواڵی رووداو</div></div>
+    <span class="tag">کامێرا ← دەقی خام ← ڕاستکراوە</span>
+  </header>
+
+  <section class="panel settings-panel" id="settingsPanel">
+    <div class="panel-head"><h2>⚙ ڕێکخستنەکانی سیستەم</h2><button class="btn small" id="closeSettings">داخستن</button></div>
+    <div class="settings-grid">
+      <div class="setting"><label for="uiLanguage">زمانی ڕێنووس</label><select id="uiLanguage"><option value="ckb">کوردیی سۆرانی</option><option value="kmr">کوردیی کرمانجی</option><option value="eng">ئینگلیزی</option></select><div class="helptext">تەنها زمانی فەرهەنگ و پشکنین دەگۆڕێت؛ زمانی وێبسایت ناگۆڕێت.</div></div>
+      <div class="setting"><label for="scanInterval">ماوەی سکەن (چرکە)</label><input id="scanInterval" type="number" min="0.2" max="60" step="0.1" value="1.1"></div>
+      <div class="setting"><label for="scanMs">ماوەی سکەن (میلی چرکە)</label><input id="scanMs" type="number" min="200" max="60000" step="100" value="1100"></div>
+      <div class="setting"><label for="wrongColor">ڕەنگی وشەی گومانلێکراو</label><input id="wrongColor" type="color" value="#ff5368"></div>
+      <div class="setting"><label for="correctColor">ڕەنگی پێشنیاری ڕاست</label><input id="correctColor" type="color" value="#38e49a"></div>
+      <div class="setting"><label for="maxHistory">ژمارەی دەقەکان لە هەر لیستێکدا</label><input id="maxHistory" type="number" min="1" max="100" step="1" value="30"></div>
+      <div class="setting"><label for="autoScan"><input id="autoScan" type="checkbox" checked> سکەنی خۆکار دوای چالاککردنی کامێرا</label></div>
+      <div class="setting"><label for="autoSend"><input id="autoSend" type="checkbox"> گواستنەوەی خۆکاری دەقی نوێ بۆ لیستی خام</label><div class="helptext">بە شێوەی بنەڕەت OCR دەق دەخاتە لیستی ٤؛ پێشنیارەکان پشکنین دەکرێن پێش گواستنەوە بۆ ٣.</div></div>
+      <div class="setting"><label for="showFrame"><input id="showFrame" type="checkbox" checked> پیشاندانی چوارچێوەی سکەن</label></div>
+    </div>
+    <div class="subsection">
+      <h3>فەرهەنگی تایبەتی ڕێنووس</h3>
+      <label class="small-label" for="customWords">هەر وشەیەک لە هێڵێکدا: هەڵە=شێوەی ڕاست</label>
+      <textarea id="customWords" class="textarea" placeholder="نموونە: رۆژ=ڕۆژ&#10;راگەیاند=ڕاگەیاند" style="min-height:75px"></textarea>
+      <div class="controls"><button class="btn" id="applySettings">پاشەکەوتکردنی ڕێکخستنەکان</button><button class="btn ghost" id="saveDictionary">جێبەجێکردنی فەرهەنگ</button></div>
+    </div>
+    <div class="subsection"><div class="helptext">تێبینی: ڕێکخستنەکان لە ناو ئەم پەڕەیەدا کار دەکەن. OCR بۆ نووسینی کوردی بە تەواوی ورد نییە؛ پێش بڵاوکردنەوە، دەقەکان بە چاوی مرۆڤ پشکنین بکە.</div></div>
+  </section>
+
+  <div class="layout">
+    <section class="panel" id="cameraPanel">
+      <div class="panel-head"><h2><span class="num n2">٢</span> کامێرا تەنها</h2><span class="tag" id="cameraState">وەستاوە</span></div>
+      <div class="camera-box" id="cameraBox">
+        <video id="video" autoplay muted playsinline hidden></video>
+        <div id="cameraPlaceholder">کامێرا چالاک بکە و دەقی مۆنتەر لەناو چوارچێوەکەدا جێگیر بکە.</div>
+        <div class="scan-frame" id="scanFrame"></div>
+        <div class="camera-overlay"><span id="cameraInfo">CAM: OFF</span><span id="scanInfo">SCAN: READY</span></div>
+      </div>
+      <div class="controls">
+        <button class="btn primary" id="startBtn">▶ چالاککردنی کامێرا</button>
+        <button class="btn danger" id="stopBtn" disabled>■ وەستاندن</button>
+        <button class="btn" id="scanBtn" disabled>⟳ سکەنی ئێستا</button>
+        <button class="btn ghost" id="fullscreenBtn">⛶ پڕکردنەوەی شاشە</button>
+        <button class="btn ghost" id="torchBtn" disabled>🔦 فلاش</button>
+      </div>
+      <div class="status"><span class="dot" id="liveDot"></span><span id="statusText">چاوەڕێی چالاککردنی کامێرا.</span></div>
+      <div class="subsection">
+        <h3>باشترکردنی وێنە بۆ خوێندنەوە</h3>
+        <div class="settings-grid">
+          <div class="setting"><label for="brightness">ڕووناکی: <span id="brightnessVal">100%</span></label><input id="brightness" type="range" min="50" max="180" value="100"></div>
+          <div class="setting"><label for="contrast">کۆنتراست: <span id="contrastVal">100%</span></label><input id="contrast" type="range" min="50" max="200" value="100"></div>
+          <div class="setting"><label for="zoom">زوم: <span id="zoomVal">1×</span></label><input id="zoom" type="range" min="1" max="3" step="0.1" value="1"></div>
+        </div>
+        <div class="controls"><button class="btn small" id="focusBtn" disabled>فۆکەسی ئۆتۆماتیک</button><button class="btn small" id="resetImage">گەڕاندنەوەی وێنە</button></div>
+        <div class="helptext">فلاش، فۆکەس و زومی کامێرا بە جۆری مۆبایل/براوزەرەکەتەوە بەستراون؛ هەموو ئامێرێک پشتگیرییان ناکات. ڕووناکی و کۆنتراست کاریگەرییان لەسەر پێشبینینی کامێرا و وێنەی OCR هەیە.</div>
+      </div>
+    </section>
+
+    <section class="panel" id="rawPanel">
+      <div class="panel-head"><h2><span class="num n4">٤</span> دەقی خامی ناسراو لە کامێرا</h2><span class="tag">OCR / RAW</span></div>
+      <div class="sub">دەقی نوێی خوێندراو لێرە زیاد دەبێت. دەقێک هەڵبژێرە بۆ دەستکاریکردن و پاشان بنێرە بۆ لیستی ٣.</div>
+      <label class="small-label" for="rawText">دەقی خام (دەتوانیت دەستکاری بکەیت)</label>
+      <textarea id="rawText" class="textarea" placeholder="دەقی خوێندراو لە کامێرا لێرە دەردەکەوێت..."></textarea>
+      <div class="controls"><button class="btn" id="checkRawBtn">پشکنینی ڕێنووس</button><button class="btn primary" id="approveBtn">✓ ڕاستکراوە بنێرە بۆ ٣</button><button class="btn ghost" id="clearRawBtn">سڕینەوەی دەقی خام</button></div>
+      <div class="subsection"><div class="panel-head"><h2>مێژووی سکەنەکان</h2><button class="btn small" id="clearRawHistory">سڕینەوەی مێژوو</button></div><div class="list" id="rawHistory"><div class="empty">هێشتا هیچ دەقێک نەخوێندراوەتەوە.</div></div></div>
+    </section>
+
+    <section class="panel" id="correctPanel">
+      <div class="panel-head"><h2><span class="num n3">٣</span> دەقی ڕاستکراوە / ئامادە</h2><span class="tag">APPROVED</span></div>
+      <div class="legend"><span><i style="background:var(--wrong)"></i> وشەی گومانلێکراو</span><span><i style="background:var(--right)"></i> پێشنیاری ڕاست</span></div>
+      <div class="result" id="previewText">دەقی خام لە ٤ هەڵبژێرە، پشکنینی بکە و ڕاستکراوەکە بنێرە بۆ ئەم لیستە.</div>
+      <div class="controls"><button class="btn" id="copyPreview">کۆپیکردنی دەقی ڕاستکراوە</button><button class="btn ghost" id="clearCorrectHistory">سڕینەوەی مێژوو</button></div>
+      <div class="subsection"><div class="panel-head"><h2>مێژووی دەقی ڕاستکراوە</h2><span class="tag" id="correctCount">0</span></div><div class="list" id="correctHistory"><div class="empty">هێشتا دەقێکی ڕاستکراوە نەنێردراوە.</div></div></div>
+    </section>
+
+    <section class="panel" id="spellPanel">
+      <div class="panel-head"><h2><span class="num n1">١</span> پشکنین و ڕێکخستن</h2><span class="tag">TOOLS</span></div>
+      <div class="sub">ئەم بەشە بۆ پشکنینی ڕێنووس و کۆنترۆڵی ڕێکخستنەکانە؛ زمانی وێبسایت بە هەمان شێوە دەمێنێتەوە.</div>
+      <div class="controls"><button class="btn primary" id="openSettings2">⚙ کردنەوەی ڕێکخستنەکان</button><button class="btn" id="runSpellCheck">پشکنینی دەقی ئێستا</button></div>
+      <div class="subsection"><h3>ئەنجامی پشکنین</h3><div class="result" id="spellResult">چاوەڕێی دەق...</div><div class="helptext" id="spellNote">فەرهەنگی بنەڕەتی ژمارەیەکی سنووردار وشەی تێدایە. بۆ وردی زیاتر فەرهەنگی تایبەتی زیاد بکە.</div></div>
+    </section>
+  </div>
+  <div class="footer-note">تایبەت بە یارمەتیدانی پشکنینی دەقی هەواڵی رووداو لە کوردستانی عێراق. ئەم ئامرازە بڕیاری کۆتایی ڕێنووس نادات؛ OCR دەتوانێت وشە و ناوی کەس و شوێن بە هەڵە بخوێنێتەوە، بۆیە پشکنینی مرۆیی پێویستە.</div>
+</div>
+
+<canvas id="ocrCanvas" hidden></canvas>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const video=$('video'), canvas=$('ocrCanvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
+ const startBtn=$('startBtn'), stopBtn=$('stopBtn'), scanBtn=$('scanBtn');
+ const statusText=$('statusText'), liveDot=$('liveDot'), placeholder=$('cameraPlaceholder');
+ const rawText=$('rawText'), rawHistoryEl=$('rawHistory'), correctHistoryEl=$('correctHistory');
+ let stream=null, timer=null, worker=null, busy=false, lastText='', rawHistory=[], correctHistory=[], customMap={}, torchOn=false, track=null;
+ let externalDictionary={};
+ fetch('./rudaw-dictionary.json').then(r=>{if(!r.ok)throw new Error('dictionary unavailable');return r.json()}).then(data=>{externalDictionary=data.entries||{};runCheck()}).catch(()=>{});
+ const dict={
+  ckb:{'راگەیاند':'ڕاگەیاند','رێگە':'ڕێگە','رێکخراو':'ڕێکخراو','رۆژ':'ڕۆژ','رۆژانە':'ڕۆژانە','رەتکردەوە':'ڕەتکردەوە','هەولێر':'هەولێر','عێراق':'عێراق','هەرێمی کوردستان':'هەرێمی کوردستان','پێشبینی':'پێشبینی','ئابووری':'ئابووری','تەندروستی':'تەندروستی','سلێمانی':'سلێمانی','دهۆک':'دهۆک','کەرکووک':'کەرکووک','هەڵەبجە':'هەڵەبجە','بەغدا':'بەغدا','کوردستان':'کوردستان','حکومەت':'حکومەت','حکومەتی':'حکومەتی'},
+  kmr:{'Kurdistan':'Kurdistan','Kurdî':'Kurdî','Kurmanci':'Kurmancî','Hewler':'Hewlêr','Duhok':'Dihok'},
+  eng:{'goverment':'government','recieve':'receive','teh':'the','adress':'address'}
+ };
+ function setStatus(msg,live=false){statusText.textContent=msg;liveDot.classList.toggle('live',live);$('cameraState').textContent=live?'چالاکە':'وەستاوە';$('cameraInfo').textContent=live?'CAM: ON':'CAM: OFF'}
+ function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ function parseCustom(){customMap={};$('customWords').value.split(/\r?\n/).forEach(line=>{let i=line.indexOf('=');if(i>0){let a=line.slice(0,i).trim(),b=line.slice(i+1).trim();if(a&&b)customMap[a]=b}})}
+ function getDictionary(){return {...(dict[$('uiLanguage').value]||{}),...( $('uiLanguage').value==='ckb' ? externalDictionary : {}),...customMap}}
+ function checkText(text){
+   const dictionary=getDictionary(), keys=Object.keys(dictionary).sort((a,b)=>b.length-a.length);
+   let found=0, html=escapeHtml(text);
+   // Match full words while preserving punctuation and whitespace.
+   const tokens=text.split(/(\s+|[،؛,.!?؟:()[\]{}«»"'—–-]+)/u);
+   const rendered=tokens.map(token=>{
+    if(!token||/^\s+$/.test(token)||/^[،؛,.!?؟:()[\]{}«»"'—–-]+$/u.test(token))return escapeHtml(token);
+    const key=keys.find(k=>k.toLocaleLowerCase()==token.toLocaleLowerCase());
+    if(key && dictionary[key]!==token){found++;return `<span class="wrong">${escapeHtml(token)}</span> <span class="suggestion">${escapeHtml(dictionary[key])}</span>`}
+    return escapeHtml(token);
+   }).join('');
+   return {html:rendered,found,plain:text};
+ }
+ function runCheck(){
+   const result=checkText(rawText.value.trim());
+   $('spellResult').innerHTML=result.plain?result.html:'هیچ دەقێک نییە بۆ پشکنین.';
+   $('spellNote').textContent=result.found?` ${result.found} وشە لە فەرهەنگدا پێشنیاری ڕاستکردنەوەیان هەیە. تکایە پشکنینیان بکە.`:'هیچ وشەیەکی هاوتا لە فەرهەنگدا نەدۆزرایەوە؛ ئەمە بە مانای بێ‌هەڵەبوونی دەق نییە.';
+ }
+ function timeLabel(){return new Date().toLocaleString('ku-IQ',{hour:'2-digit',minute:'2-digit',second:'2-digit',day:'2-digit',month:'2-digit'})}
+ function renderHistory(){
+  const max=Math.max(1,Math.min(100,Number($('maxHistory').value)||30));
+  rawHistory=rawHistory.slice(0,max);correctHistory=correctHistory.slice(0,max);
+  rawHistoryEl.innerHTML=rawHistory.length?rawHistory.map((e,i)=>`<article class="entry"><div class="entry-top"><span class="entry-time">${escapeHtml(e.time)}</span><button class="btn small" data-raw="${i}">بارکردن بۆ دەستکاری</button></div><div class="entry-text">${escapeHtml(e.text)}</div></article>`).join(''):'<div class="empty">هێشتا هیچ دەقێک نەخوێندراوەتەوە.</div>';
+  correctHistoryEl.innerHTML=correctHistory.length?correctHistory.map((e,i)=>`<article class="entry"><div class="entry-top"><span class="entry-time">${escapeHtml(e.time)}</span><div class="entry-actions"><button class="btn small" data-copy="${i}">کۆپی</button><button class="btn small danger" data-delete="${i}">سڕینەوە</button></div></div><div class="entry-text">${escapeHtml(e.text)}</div></article>`).join(''):'<div class="empty">هێشتا دەقێکی ڕاستکراوە نەنێردراوە.</div>';
+  $('correctCount').textContent=String(correctHistory.length);
+ }
+ function addRaw(text){
+  const t=text.trim();if(!t)return;
+  if(rawHistory.length&&rawHistory[0].text===t)return;
+  rawHistory.unshift({text:t,time:timeLabel()});renderHistory();rawText.value=t;runCheck();
+ }
+ function approveText(){
+  const text=rawText.value.trim();if(!text){setStatus('سەرەتا دەقێک لە ٤ هەڵبژێرە یان بنووسە.');return}
+  const checked=checkText(text);$('previewText').innerHTML=checked.html;
+  correctHistory.unshift({text,time:timeLabel()});renderHistory();
+  setStatus('دەق بۆ لیستی ٣ نێردرا. پێش بڵاوکردنەوە پشکنینی بکە.',true);
+ }
+ async function initWorker(){
+  if(worker)return worker;
+  if(!window.Tesseract)throw new Error('کتێبخانەی OCR بار نەکرا. پەیوەندی ئینتەرنێت پشکنە.');
+  setStatus('ئامادەکردنی OCR...');
+  // Arabic model can read some Arabic-script Kurdish, but it is not a dedicated Sorani model.
+  worker=await Tesseract.createWorker('ara',1,{logger:m=>{if(m.status==='recognizing text'){$('scanInfo').textContent='SCAN: '+Math.round((m.progress||0)*100)+'%';}}});
+  return worker;
+ }
+ async function recognize(){
+  if(!stream||busy||video.readyState<2)return;
+  busy=true;
+  try{
+   const w=await initWorker(), vw=video.videoWidth, vh=video.videoHeight;
+   if(!vw||!vh)return;
+   const scale=Math.min(1,2200/vw);canvas.width=Math.round(vw*scale);canvas.height=Math.round(vh*scale);
+   ctx.filter=`brightness(${$('brightness').value}%) contrast(${$('contrast').value}%)`;
+   ctx.drawImage(video,0,0,canvas.width,canvas.height);ctx.filter='none';
+   const result=await w.recognize(canvas), text=(result.data.text||'').trim();
+   if(text&&text!==lastText){lastText=text;addRaw(text)}
+   $('scanInfo').textContent=text?'SCAN: TEXT':'SCAN: EMPTY';
+   setStatus(text?'دەق خوێندرایەوە و لە لیستی ٤ زیاد کرا.':'دەق نەدۆزرایەوە؛ ڕووناکی/فۆکەس بگۆڕە.',true);
+  }catch(e){setStatus('هەڵەی OCR: '+e.message);console.error(e)}
+  finally{busy=false}
+ }
+ function restartTimer(){
+  if(timer){clearInterval(timer);timer=null}
+  if(stream&&$('autoScan').checked){const ms=Math.max(200,Math.min(60000,Number($('scanMs').value)||1100));timer=setInterval(recognize,ms)}
+ }
+ async function start(){
+  try{
+   if(!navigator.mediaDevices?.getUserMedia)throw new Error('براوزەر یان پەیوەندی HTTPS پشتگیری کامێرا ناکات.');
+   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+   video.srcObject=stream;video.hidden=false;placeholder.hidden=true;track=stream.getVideoTracks()[0];await video.play();
+   startBtn.disabled=true;stopBtn.disabled=false;scanBtn.disabled=false;$('torchBtn').disabled=false;$('focusBtn').disabled=false;
+   setStatus('کامێرا چالاکە.',true);restartTimer();
+   if(!$('autoScan').checked)await recognize();
+  }catch(e){setStatus('کامێرا نەکراوە: '+e.message);stop()}
+ }
+ function stop(){
+  if(timer){clearInterval(timer);timer=null}
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  track=null;video.srcObject=null;video.hidden=true;placeholder.hidden=false;
+  startBtn.disabled=false;stopBtn.disabled=true;scanBtn.disabled=true;$('torchBtn').disabled=true;$('focusBtn').disabled=true;torchOn=false;$('torchBtn').textContent='🔦 فلاش';
+  setStatus('کامێرا وەستێنراوە.');$('scanInfo').textContent='SCAN: READY';
+ }
+ function applyZoom(){video.style.transform=`scale(${$('zoom').value})`;$('zoomVal').textContent=Number($('zoom').value).toFixed(1).replace('.0','')+'×'}
+ $('settingsToggle').addEventListener('click',()=>{const open=$('settingsPanel').classList.toggle('open');$('settingsToggle').setAttribute('aria-expanded',String(open));if(open)$('settingsPanel').scrollIntoView({behavior:'smooth',block:'start'})});
+ $('openSettings2').addEventListener('click',()=>{$('settingsPanel').classList.add('open');$('settingsToggle').setAttribute('aria-expanded','true');$('settingsPanel').scrollIntoView({behavior:'smooth',block:'start'})});
+ $('closeSettings').addEventListener('click',()=>{$('settingsPanel').classList.remove('open');$('settingsToggle').setAttribute('aria-expanded','false')});
+ $('startBtn').addEventListener('click',start);$('stopBtn').addEventListener('click',stop);$('scanBtn').addEventListener('click',recognize);
+ $('fullscreenBtn').addEventListener('click',async()=>{try{const box=$('cameraBox');if(!document.fullscreenElement)await box.requestFullscreen();else await document.exitFullscreen()}catch(e){setStatus('پڕکردنەوەی شاشە پشتگیری ناکرێت لەم براوزەرەدا.')}});
+ $('torchBtn').addEventListener('click',async()=>{try{if(!track) return;const caps=track.getCapabilities?.()||{};if(!caps.torch){setStatus('فلاشی کامێرا لەم ئامێرەدا بە API پشتگیری ناکرێت.');return}torchOn=!torchOn;await track.applyConstraints({advanced:[{torch:torchOn}]});$('torchBtn').textContent=torchOn?'🔦 داخستنی فلاش':'🔦 فلاش'}catch(e){setStatus('نەتوانرا فلاش بگۆڕدرێت: '+e.message)}});
+ $('focusBtn').addEventListener('click',async()=>{try{if(!track)return;const caps=track.getCapabilities?.()||{};if(!caps.focusMode){setStatus('کۆنترۆڵی فۆکەس لەم کامێرایەدا بە براوزەر بەردەست نییە.');return}await track.applyConstraints({advanced:[{focusMode:'continuous'}]});setStatus('فۆکەسی بەردەوام داواکرا.',true)}catch(e){setStatus('فۆکەس نەگۆڕدرا: '+e.message)}});
+ $('brightness').addEventListener('input',()=>{$('brightnessVal').textContent=$('brightness').value+'%';video.style.filter=`brightness(${$('brightness').value}%) contrast(${$('contrast').value}%)`});
+ $('contrast').addEventListener('input',()=>{$('contrastVal').textContent=$('contrast').value+'%';video.style.filter=`brightness($('brightness').value}%) contrast(${$('contrast').value}%)`.replace('value}', 'value')});
+ // Reapply both filters with a single safe template.
+ function updateFilters(){video.style.filter=`brightness(${$('brightness').value}%) contrast(${$('contrast').value}%)`; $('brightnessVal').textContent=$('brightness').value+'%';$('contrastVal').textContent=$('contrast').value+'%'}
+ $('brightness').addEventListener('input',updateFilters);$('contrast').addEventListener('input',updateFilters);
+ $('zoom').addEventListener('input',applyZoom);
+ $('resetImage').addEventListener('click',()=>{$('brightness').value=100;$('contrast').value=100;$('zoom').value=1;updateFilters();applyZoom();setStatus('ڕووناکی، کۆنتراست و زوم گەڕێنرانەوە بۆ بنەڕەت.')});
+ $('scanFrame').style.display='block';$('showFrame').addEventListener('change',()=>$('scanFrame').style.display=$('showFrame').checked?'block':'none');
+ $('scanInterval').addEventListener('input',()=>{const sec=Number($('scanInterval').value);if(Number.isFinite(sec)&&sec>0){$('scanMs').value=Math.round(sec*1000);restartTimer()}});
+ $('scanMs').addEventListener('input',()=>{const ms=Number($('scanMs').value);if(Number.isFinite(ms)&&ms>=200){$('scanInterval').value=(ms/1000).toFixed(1);restartTimer()}});
+ $('autoScan').addEventListener('change',()=>{if(stream){if($('autoScan').checked)restartTimer();else if(timer){clearInterval(timer);timer=null}}});
+ $('wrongColor').addEventListener('input',() => document.documentElement.style.setProperty('--wrong',$('wrongColor').value));
+ $('correctColor').addEventListener('input',() => document.documentElement.style.setProperty('--right',$('correctColor').value));
+ $('applySettings').addEventListener('click',()=>{const ms=Math.max(200,Math.min(60000,Number($('scanMs').value)||1100));$('scanMs').value=ms;$('scanInterval').value=(ms/1000).toFixed(1);$('maxHistory').value=Math.max(1,Math.min(100,Number($('maxHistory').value)||30));restartTimer();renderHistory();setStatus('ڕێکخستنەکان جێبەجێ کران.')});
+ $('saveDictionary').addEventListener('click',()=>{parseCustom();runCheck();setStatus('فەرهەنگی تایبەتی جێبەجێ کرا.')});
+ $('checkRawBtn').addEventListener('click',runCheck);$('runSpellCheck').addEventListener('click',runCheck);
+ $('approveBtn').addEventListener('click',approveText);
+ $('clearRawBtn').addEventListener('click',()=>{rawText.value='';$('spellResult').textContent='چاوەڕێی دەق...';lastText=''});
+ $('clearRawHistory').addEventListener('click',()=>{rawHistory=[];renderHistory()});
+ $('clearCorrectHistory').addEventListener('click',()=>{correctHistory=[];renderHistory();$('previewText').textContent='مێژووی دەقی ڕاستکراوە سڕایەوە.'});
+ rawHistoryEl.addEventListener('click',e=>{const b=e.target.closest('[data-raw]');if(b){const item=rawHistory[Number(b.dataset.raw)];if(item){rawText.value=item.text;runCheck();$('rawText').scrollIntoView({behavior:'smooth',block:'center'})}}});
+ correctHistoryEl.addEventListener('click',async e=>{const c=e.target.closest('[data-copy]'),d=e.target.closest('[data-delete]');if(c){const item=correctHistory[Number(c.dataset.copy)];if(item)try{await navigator.clipboard.writeText(item.text);setStatus('دەقی ڕاستکراوە کۆپی کرا.')}catch{setStatus('کۆپی ئۆتۆماتیک نەکرا؛ دەقەکە هەڵبژێرە.')}}if(d){correctHistory.splice(Number(d.dataset.delete),1);renderHistory()}});
+ $('copyPreview').addEventListener('click',async()=>{const text=$('previewText').innerText;if(!text||text.startsWith('دەقی خام'))return;try{await navigator.clipboard.writeText(text);setStatus('دەقی ڕاستکراوە کۆپی کرا.')}catch{setStatus('کۆپی لەم براوزەرەدا بەردەست نییە.')}});
+ rawText.addEventListener('input',runCheck);
+ window.addEventListener('pagehide',stop);
+ updateFilters();applyZoom();renderHistory();
+})();
+</script>
+</body>
+</html>
