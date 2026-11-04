@@ -1,0 +1,21 @@
+/*
+  Rudaw MCR Checker — font configuration
+  This is a font stylesheet, not an official Rudaw-owned font binary.
+  If Rudaw supplies an authorized font file, place it beside this CSS and uncomment
+  the @font-face rule below, updating the filename and format as needed.
+*/
+/*
+@font-face {
+  font-family: "RudawOfficial";
+  src: url("./rudaw-official-font.woff2") format("woff2");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+:root {
+  --mcr-font-family: "RudawOfficial", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+}
+html, body, button, input, select, textarea, .result, .entry-text {
+  font-family: var(--mcr-font-family);
+}
