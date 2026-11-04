@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ckb" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Rudaw CG Smart Assistant - Sorani OCR and proofreading">
+  <title>Rudaw CG Smart Assistant</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brand-mark">CG</div><div><strong>Rudaw CG Smart Assistant</strong><small>یاریدەدەری زیرەکی بۆ CG</small></div></div>
+  <div class="top-actions"><span id="connection" class="status">پشکنینی پەیوەندی...</span><button id="installBtn" class="ghost hidden">دامەزراندن</button></div>
+</header>
+<main class="shell">
+  <section class="intro">
+    <div><p class="eyebrow">SORANI • LIVE WORKFLOW</p><h1>پشکنینی خێرای دەقی CG</h1><p class="muted">دەقەکە لە Preview وێنە بگرە، OCR دەقی دەردەهێنێت و هەڵە ڕوونەکان نیشان دەدات.</p></div>
+    <div class="live-pill"><i></i> LIVE READY</div>
+  </section>
+
+  <section class="grid">
+    <article class="panel camera-panel">
+      <div class="panel-head"><div><span class="step">01</span><h2>کامێرا و پشکنین</h2></div><span id="cameraState" class="mini-state">ئامادە نییە</span></div>
+      <div class="camera-wrap">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="captureCanvas" class="hidden"></canvas>
+        <div id="cameraPlaceholder" class="camera-placeholder"><div class="camera-icon">⌁</div><b>کامێرا چالاک بکە</b><small>مۆبایل ئاراستەی شاشەی CG بکە</small></div>
+        <div class="scan-line"></div>
+      </div>
+      <div class="controls">
+        <button id="startCamera" class="primary">چالاککردنی کامێرا</button>
+        <button id="scanBtn" disabled>SCAN & CHECK</button>
+        <button id="stopCamera" class="ghost" disabled>وەستاندن</button>
+      </div>
+      <p class="hint">بۆ پاراستنی خێرایی، وێنەکە تەنها کاتێک دەخوێندرێتەوە کە Scan بکەیت. Live preview بەردەوامە.</p>
+      <div class="divider"></div>
+      <label class="file-label">یان وێنەی CG هەڵبژێرە <input id="imageInput" type="file" accept="image/*" capture="environment"></label>
+    </article>
+
+    <article class="panel result-panel">
+      <div class="panel-head"><div><span class="step">02</span><h2>ئەنجامی پشکنین</h2></div><span id="ocrState" class="mini-state">چاوەڕێی Scan</span></div>
+      <div class="metric-row">
+        <div class="metric"><strong id="elapsed">—</strong><small>چرکە</small></div>
+        <div class="metric"><strong id="errorCount">0</strong><small>پێشنیار</small></div>
+        <div class="metric"><strong id="modeLabel">Offline</strong><small>شێوازی پشکنین</small></div>
+      </div>
+      <label class="field-label" for="sourceText">دەقی دەرهێنراو / دەقی CG</label>
+      <textarea id="sourceText" rows="5" placeholder="دەق لێرە دەردەکەوێت... دەتوانیت بە دەستیش بینووسیت."></textarea>
+      <div class="row-actions"><button id="checkText" class="primary">پشکنینی دەق</button><button id="clearText" class="ghost">پاککردنەوە</button></div>
+      <label class="field-label" for="correctedText">دەقی پێشنیارکراو</label>
+      <textarea id="correctedText" rows="5" placeholder="دەقی پێشنیارکراو لێرە..."></textarea>
+      <div class="row-actions"><button id="copyBtn" class="primary">کۆپیکردن</button><button id="useCorrection" class="ghost">گواستنەوە بۆ دەقی سەرەوە</button></div>
+      <div id="feedback" class="feedback" aria-live="polite">ئامادەی پشکنینە. تکایە پێش پەخش، دەقەکە بە چاوی خۆت پشتڕاست بکەرەوە.</div>
+    </article>
+  </section>
+
+  <section class="panel suggestions">
+    <div class="panel-head"><div><span class="step">03</span><h2>وردەکاریی پێشنیارەکان</h2></div><span class="mini-state">یاساکانی خێرا</span></div>
+    <div id="issues" class="issues"><p class="empty">هێشتا هیچ پشکنینێک نەکراوە.</p></div>
+  </section>
+
+  <section class="panel settings">
+    <div class="panel-head"><div><span class="step">04</span><h2>ڕێکخستن</h2></div><span class="mini-state">Hybrid AI</span></div>
+    <div class="settings-grid">
+      <label class="setting"><span>AI API URL (ئارەزوومەندانە)</span><input id="apiUrl" type="url" placeholder="https://your-server.example/api/check"></label>
+      <label class="setting"><span>OCR Language</span><select id="ocrLang"><option value="ara">Arabic (نزیکترین پشتگیریی Tesseract)</option><option value="eng">English</option></select></label>
+    </div>
+    <p class="hint">پشکنینی ناوخۆیی یاسا سادەکان بەبێ ئینتەرنێت دەکات. بۆ ڕێزمانی پێشکەوتوو، API ـی پارێزراوی سێرڤەر پێویستە. کلیلی API لەم پەڕەیەدا مەنووسە.</p>
+  </section>
+
+  <section class="panel history">
+    <div class="panel-head"><div><span class="step">05</span><h2>مێژووی پشکنین</h2></div><button id="clearHistory" class="ghost small">سڕینەوەی مێژوو</button></div>
+    <div id="historyList" class="history-list"><p class="empty">مێژووی پشکنین لێرە پیشان دەدرێت.</p></div>
+  </section>
+  <footer>Rudaw CG Smart Assistant • ئامرازی یارمەتیدەرە، بڕیاری کۆتایی لەگەڵ ئۆپەراتۆرە.</footer>
+</main>
+<div id="toast" class="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
